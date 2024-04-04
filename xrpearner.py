@@ -41,6 +41,7 @@ def login():
 		print(reponse.text)
 
 def activate_token(session):
+	count = 0;
 	while True:
 		url = "https://faucetearner.org/api.php?act=get_faucet"
 		headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
@@ -49,9 +50,10 @@ def activate_token(session):
 		response = session.post(url, headers=headers)
 		if response.status_code == 200:
 			text = json.loads(response.text)
-			collect_token(session)
+			collect_token(session); count += 1
 			print(text["message"])
-			countdown(60)
+			print(f"\nClaims:{count}")
+			print("Time-Left:"); countdown(60)
 		else:
 			print("An error occured here..")
 			print(response.text)
