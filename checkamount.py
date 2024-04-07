@@ -57,7 +57,7 @@ def collect_details():
 
 def check_func():
 	total = 0; count = 1
-	with open("logins.txt", "r") as file:
+	with open("user_data.txt", "r") as file:
 		for line in file:
 			line = line.strip()
 			user, mail, pwd = line.split(" ")

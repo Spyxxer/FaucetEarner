@@ -41,13 +41,13 @@ def login(email, password, c):
 			text = json.loads(response.text)
 			if "wrong" in text["message"]:
 				print(f"Invalid Credentials.. on line {c}")
+				return "End"
 			else:
 				print(f"{text['message']} on user: {email}"); activate_token(session, user)		
 		else:
 			print("An error occured while trying to login")
 	except Exception as e:
-		print(e); login(email, password, c)
-
+		print(e);
 def activate_token(session, user):
 	count = 0
 	while True:
@@ -59,7 +59,7 @@ def activate_token(session, user):
 		if response.status_code == 200:
 			text = json.loads(response.text)
 			collect_token(session); count += 1
-			print(text["message"]); print(f"\nClaims on user: {user}")
+			print(text["message"]); print(f"\nClaims on user: {user} = {count}")
 			countdown(60)
 		else:
 			print("An error occured here..")
@@ -83,8 +83,11 @@ with open('user_data.txt', 'r') as file:
 	for line in file:
 		line = line.strip()
 		user, mail, pwd = line.split(" ")
-		thread = threading.Thread(target=login, args=(user, pwd, i)); thread.start(); i += 1
-		time.sleep(5)
+		try:
+			thread = threading.Thread(target=login, args=(user, pwd, i)); thread.start(); 
+			i += 1; time.sleep(5)
+		except Exception as e:
+			print(e); break
 
 
 
