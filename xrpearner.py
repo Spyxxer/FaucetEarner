@@ -1,6 +1,7 @@
 import requests
 import time
 import json
+import getpass
 
 def countdown(seconds):
     while seconds > 0:
@@ -12,9 +13,9 @@ def countdown(seconds):
 
 def collect_details():
 	email = input("Insert your email or username: ")
-	pswd = input("Insert your password: ")
+	pswd = getpass.getpass("Insert your password: ")
 
-	resp = input("Is the following above correct -> (y/n):")
+	resp = input("Is the following above correct -> (y/n): ")
 	if resp.lower() == "y":
 		return email, pswd
 	else:
@@ -31,14 +32,21 @@ def login():
 	email, pwd = collect_details()
 	session = requests.Session()
 	payload = {"email":email, "password":pwd}
-	response = session.post(url, json=payload, headers=headers)
-
-	if response.status_code == 200:
-		print("Login Successful...")
-		activate_token(session)		
-	else:
-		print("An error occured while trying to login")
-		print(reponse.text)
+	
+	try:
+		response = session.post(url, json=payload, headers=headers)
+		if response.status_code == 200:
+			print("Attempting..")
+			text = json.loads(response.text)
+			if "wrong" in text["message"]:
+				print("Invalid Credentials..")
+			else:
+				print(f"{text['message']} on user: {email}"); activate_token(session)		
+		else:
+			print("An error occured while trying to login")
+			print(reponse.text)
+	except Exception as e:
+		print(e)
 
 def activate_token(session):
 	count = 0;
@@ -52,8 +60,8 @@ def activate_token(session):
 			text = json.loads(response.text)
 			collect_token(session); count += 1
 			print(text["message"])
-			print(f"\nClaims:{count}")
-			print("Time-Left:"); countdown(60)
+			print(f"\nClaims:{count}"); print()
+			print("Time-Left"); countdown(60)
 		else:
 			print("An error occured here..")
 			print(response.text)

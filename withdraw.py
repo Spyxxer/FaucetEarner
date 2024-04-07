@@ -1,20 +1,30 @@
 import requests
 import json
 import threading
-import time
+import time, re
 
 def process_withdrawal(session, address, tag):
 	url = "https://faucetearner.org/api.php?act=withdraw"
 	headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
 	"X-Requested-With":"XMLHttpRequest", "Content-Type":"application/json"}
-	payload = {"amount":"", "eth_address":None, "tag":tag, "wallet":address}
-	response = session.post(url, json=, headers=headers)
-	if response.status_code == 200:
-		print(f"withdrawing to address [{address}]..")
-		print(response.text)
+	url_load = "https://faucetearner.org/withdraw.php"
+	response_load = session.get(url_load, headers=headers)
+	if response_load.status_code == 200:
+		text = response_load.text
+		pattern = r'value="(\d*\.\d+)"'
+		# Search for floating point numbers in the text
+		pamt = re.findall(pattern, text)[0]
+		payload = {"amount":pamt, "eth_address":None, "tag":tag, "wallet":address}
+		response = session.post(url, json=payload, headers=headers)
+		if response.status_code == 200:
+			print(f"withdrawing to address [{address}]..")
+			text = json.loads(response.text)["message"]
+			print(text)
+		else:
+			print(response.text)
 	else:
-		print(response.text)
-
+		print("Status_CODE:", response_load.status_code)
+	
 
 def login(email, password, address, tag):
 	headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
@@ -33,14 +43,14 @@ def login(email, password, address, tag):
 		process_withdrawal(session, address, tag)	
 	else:
 		print("An error occured while trying to login")
-		print(reponse.text)
+		print(response.text)
 
 
 def collect_details():
 	email = input("Insert your email or username: ")
 	pswd = input("Insert your password: ")
 
-	resp = input("Is the following above correct -> (y/n):")
+	resp = input("Is the following above correct -> (y/n): ")
 	if resp.lower() == "y":
 		return email, pswd
 	else:
@@ -51,19 +61,19 @@ def withdraw_func():
 	tag = input("Please insert memo/tag: ")
 	ans = input("Please Is the following above correct > [y/n]: ")
 	if ans.lower() == "y":
-		withdraw_type = input("Insert withdrawal type -> [single/multiple]")
+		withdraw_type = input("Insert withdrawal type -> [single/multiple]: ")
 		if withdraw_type == "single":
 			user, password = collect_details()
 			login(user, password, address, tag)
 		elif withdraw_type == "multiple":
 			with open("logins.txt", "r") as file:
 				for line in file:
-    				line = line.strip()
-    				user, mail, pwd = line.split(" ")
-    				thread = threading.Thread(target=login, args=(user, pwd, address, tag))
-    				thread.start(); time.sleep(5)
-    	else:
-    		print("INVALID RESPONSE!"); withdraw_func()
+					line = line.strip()
+					user, mail, pwd = line.split(" ")
+					thread = threading.Thread(target=login, args=(user, pwd, address, tag))
+					thread.start(); time.sleep(3000)
+		else:
+			print("INVALID RESPONSE!"); withdraw_func()
 	else:
 		withdraw_func()
 
