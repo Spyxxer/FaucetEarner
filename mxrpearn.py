@@ -4,6 +4,8 @@ import json, sys
 import threading
 import multiprocessing
 
+sys.setrecursionlimit(1000000)
+
 def countdown(seconds, user):
     while seconds > 0:
         mins, secs = divmod(seconds, 60)
@@ -71,6 +73,7 @@ def activate_token(session, user):
 				print(response.status_code)
 	except Exception:
 		activate_token(session, user)
+
 
 def collect_token(session, user):
 	url = "https://faucetearner.org/api.php?act=faucet"
