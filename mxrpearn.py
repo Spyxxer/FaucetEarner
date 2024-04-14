@@ -24,7 +24,7 @@ def collect_details():
 
 
 
-def login(email, password, c):
+def login(email, password, c, retries=3):
 	headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
 	"X-Requested-With":"XMLHttpRequest", "Content-Type":"application/json"}
 
@@ -46,24 +46,31 @@ def login(email, password, c):
 			else:
 				print(f"{text['message']} on user: {email}"); activate_token(session, user)		
 		else:
+			print(response.status_code)
 			print("An error occured while trying to login")
 	except Exception as e:
-		print(e);
+		print(e, sys.exc_info()); print("While attempting login..")
+		if retries > 0:
+			retries -= 1; login(email, password, c)
+
 def activate_token(session, user):
 	count = 0
-	while True:
-		url = "https://faucetearner.org/api.php?act=get_faucet"
-		headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
-		"X-Requested-With":"XMLHttpRequest", "Content-Type":"application/json"}
-		response = session.post(url, headers=headers)
-		if response.status_code == 200:
-			text = json.loads(response.text)
-			collect_token(session, user); count += 1
-			print(text["message"]); print(f"\nClaims on user: {user} = [{count}]")
-			countdown(60, user)
-		else:
-			print(f"An error occured here on activating token..{user}"); 
-			print(response.status_code)
+	try:
+		while True:
+			url = "https://faucetearner.org/api.php?act=get_faucet"
+			headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
+			"X-Requested-With":"XMLHttpRequest", "Content-Type":"application/json"}
+			response = session.post(url, headers=headers)
+			if response.status_code == 200:
+				text = json.loads(response.text)
+				collect_token(session, user); count += 1
+				print(text["message"]); print(f"\nClaims on user: {user} = [{count}]")
+				countdown(60, user)
+			else:
+				print(f"An error occured here on activating token..{user}"); 
+				print(response.status_code)
+	except Exception:
+		activate_token(session, user)
 
 def collect_token(session, user):
 	url = "https://faucetearner.org/api.php?act=faucet"
@@ -79,13 +86,16 @@ def collect_token(session, user):
 		
 
 with open('user_data.txt', 'r') as file:
-	i = 1; 
+	i = 1; req = 3
 	for line in file:
 		line = line.strip()
-		user, mail, pwd = line.split(" ")
+		user, mail, pwd, address, tag = line.split(" ")
 		try:
 			thread = threading.Thread(target=login, args=(user, pwd, i)); thread.start();
-			i += 1; time.sleep(30)
+			time.sleep(5)
+			i += 1;
+			if i > req:
+				break
 		except Exception as e:
 			print(e); break
 

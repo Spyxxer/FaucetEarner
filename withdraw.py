@@ -12,8 +12,9 @@ def process_withdrawal(session, address, tag):
 	if response_load.status_code == 200:
 		text = response_load.text
 		pattern = r'value="(\d*\.\d+)"'
+
 		# Search for floating point numbers in the text
-		pamt = re.findall(pattern, text)[0]
+		pamt = re.findall(pattern, text)[0] 
 		payload = {"amount":pamt, "eth_address":None, "tag":tag, "wallet":address}
 		response = session.post(url, json=payload, headers=headers)
 		if response.status_code == 200:
@@ -57,24 +58,28 @@ def collect_details():
 		collect_details()
 
 def withdraw_func():
-	address = input("Please insert address: ")
-	tag = input("Please insert memo/tag: ")
-	ans = input("Please Is the following above correct > [y/n]: ")
-	if ans.lower() == "y":
-		withdraw_type = input("Insert withdrawal type -> [single/multiple]: ")
-		if withdraw_type == "single":
+	withdraw_type = input("Insert withdrawal type -> [single/multiple]: ")
+	if withdraw_type == "single":
+		address = input("Please insert address: ")
+		tag = input("Please insert memo/tag: ")
+		ans = input("Is the following above correct > [y/n]: ")
+		if ans.lower() == "y":
 			user, password = collect_details()
 			login(user, password, address, tag)
-		elif withdraw_type == "multiple":
-			with open("logins.txt", "r") as file:
-				for line in file:
-					line = line.strip()
-					user, mail, pwd = line.split(" ")
-					thread = threading.Thread(target=login, args=(user, pwd, address, tag))
-					thread.start(); time.sleep(3000)
 		else:
-			print("INVALID RESPONSE!"); withdraw_func()
+			withdraw_func()
+	elif withdraw_type == "multiple":
+		i = 1; req = 3;
+		with open("user_data.txt", "r") as file:
+			for line in file:
+				line = line.strip()
+				user, mail, pwd, address, tag = line.split(" ")
+				thread = threading.Thread(target=login, args=(user, pwd, address, tag))
+				thread.start(); time.sleep(5)
+				i += 1
+				if i > 3:
+					break
 	else:
-		withdraw_func()
+		print("Invalid RESPONSE!"); withdraw_func()
 
 withdraw_func()
