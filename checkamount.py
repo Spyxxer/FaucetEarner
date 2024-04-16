@@ -60,16 +60,18 @@ def check_func():
 	with open("user_data.txt", "r") as file:
 		for line in file:
 			line = line.strip()
-			user, mail, pwd = line.split(" ")
+			user, mail, pwd, address, tag = line.split(" ")
 			value = login(user, pwd, count)
 			if isinstance(value, float):
 				total += value
-				print("Current Total is: ", total)
+				print("Amount in account: ", value); print("Current Total is: ", total)
 			elif value == "End":
 				break
 			else:
 				print("Value Found: ", value);
 			count += 1
+			if count > 3:
+				break
 	print("Total Amount Found: ", total)
 
 check_func()

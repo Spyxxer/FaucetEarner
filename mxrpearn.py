@@ -10,9 +10,9 @@ def countdown(seconds, user):
     while seconds > 0:
         mins, secs = divmod(seconds, 60)
         timer = '{:02d}:{:02d}'.format(mins, secs)
-        print(timer, end='\r')  # Print timer on the same line
+        print(timer,f' on {user}',end='\r')  # Print timer on the same line
         time.sleep(1); seconds -= 1
-    print(f'Countdown complete! on {user}')
+    print(f'Countdown complete on {user}!')
 
 def collect_details():
 	email = input("Insert your email or username: ")
@@ -72,7 +72,8 @@ def activate_token(session, user):
 				print(f"An error occured here on activating token..{user}"); 
 				print(response.status_code)
 	except Exception:
-		activate_token(session, user)
+		print("Connection error on activating token..")
+		countdown(10, user); activate_token(session, user)
 
 
 def collect_token(session, user):
@@ -95,7 +96,7 @@ with open('user_data.txt', 'r') as file:
 		user, mail, pwd, address, tag = line.split(" ")
 		try:
 			thread = threading.Thread(target=login, args=(user, pwd, i)); thread.start();
-			time.sleep(5)
+			time.sleep(2.5)
 			i += 1;
 			if i > req:
 				break

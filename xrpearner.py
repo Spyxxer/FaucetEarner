@@ -1,6 +1,7 @@
+import platfrom
 import requests
 import time
-import json
+import json, sys
 import getpass
 
 def countdown(seconds):
@@ -29,6 +30,8 @@ def login():
 
 	url = "https://faucetearner.org/api.php?act=login"
 
+	print(f"-----------Running Script on---------------\nOS: {platform.system()}\nArchitecture: {' '.join(platform.architecture())}\nMachine: {platform.machine()}\nVersion: {platform.version()}\nProcessor: {platform.processor()}")
+
 	email, pwd = collect_details()
 	session = requests.Session()
 	payload = {"email":email, "password":pwd}
@@ -50,21 +53,25 @@ def login():
 
 def activate_token(session):
 	count = 0;
-	while True:
-		url = "https://faucetearner.org/api.php?act=get_faucet"
-		headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
-		"X-Requested-With":"XMLHttpRequest", "Content-Type":"application/json"}
-
-		response = session.post(url, headers=headers)
-		if response.status_code == 200:
-			text = json.loads(response.text)
-			collect_token(session); count += 1
-			print(text["message"])
-			print(f"\nClaims:{count}"); print()
-			print("Time-Left"); countdown(60)
-		else:
-			print("An error occured here..")
-			print(response.text)
+	try:
+		while True:
+			url = "https://faucetearner.org/api.php?act=get_faucet"
+			headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
+			"X-Requested-With":"XMLHttpRequest", "Content-Type":"application/json"}
+	
+			response = session.post(url, headers=headers)
+			if response.status_code == 200:
+				text = json.loads(response.text)
+				collect_token(session); count += 1
+				print(text["message"])
+				print(f"\nClaims:{count}"); print()
+				print("Time-Left"); countdown(60)
+			else:
+				print("An error occured here..")
+				print(response.text)
+	except Exception:
+		print(sys.exc_info())
+		countdown(10); activate_token(session)
 
 def collect_token(session):
 	url = "https://faucetearner.org/api.php?act=faucet"
@@ -73,7 +80,7 @@ def collect_token(session):
 	response = session.post(url, headers=headers)
 	if response.status_code == 200:
 		text = json.loads(response.text)
-		print(); print(text["message"])
+		print(); print(text["message"]);
 	else:
 		print("An error occured here..")
 		print(response.text)

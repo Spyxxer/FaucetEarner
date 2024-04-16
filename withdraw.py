@@ -69,7 +69,7 @@ def withdraw_func():
 		else:
 			withdraw_func()
 	elif withdraw_type == "multiple":
-		i = 1; req = 3;
+		i = 1; req = 2;
 		with open("user_data.txt", "r") as file:
 			for line in file:
 				line = line.strip()
@@ -77,7 +77,7 @@ def withdraw_func():
 				thread = threading.Thread(target=login, args=(user, pwd, address, tag))
 				thread.start(); time.sleep(5)
 				i += 1
-				if i > 3:
+				if i > 2:
 					break
 	else:
 		print("Invalid RESPONSE!"); withdraw_func()
